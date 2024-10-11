@@ -1,0 +1,70 @@
+/* graph-visualizer.css */
+
+/* 全体のリセット */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: sans-serif;
+  }
+  
+  #graphSection {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+  }
+  
+  #graphCanvas {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    display: block;
+  }
+  
+  /* 情報パネルのスタイル */
+  #infoPanel {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 250px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    font-size: 14px;
+    z-index: 10;
+  }
+  
+  #infoPanel h2 {
+    margin-top: 0;
+  }
+  
+  /* サーチバーのスタイル */
+  #searchBar {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  
+  #searchBar input[type="text"] {
+    width: 200px;
+    padding: 5px;
+    font-size: 14px;
+  }
+  
+  #searchBar button {
+    padding: 5px 10px;
+    font-size: 14px;
+    margin-left: 5px;
+    cursor: pointer;
+  }
+  
