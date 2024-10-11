@@ -70,14 +70,14 @@
   <script type="module">
     import { GraphVisualizer } from './graph-visualizer.js';
 
-    // GraphVisualizer インスタンスを作成
+    // インスタンスの作成
     const graph = new GraphVisualizer("graphCanvas", {
-      showGuideAxes: true,
-      nodeRadius: 20,
-      highlightSearchColor: "#f1c40f"
+      showGuideAxes: true,                 // ガイド軸を表示
+      nodeRadius: 20,                      // ノードの半径を大きくする
+      highlightSearchColor: "#f1c40f",     // 検索ハイライト色（黄色）
     });
 
-    // ノードとエッジの追加
+    // ノードとエッジの追加（サンプルデータ）
     graph.addGraphNode("A");
     graph.addGraphNode("B");
     graph.addGraphEdge("A", "B", "関連性");
@@ -94,29 +94,65 @@
     graph.addGraphNode("F");
     graph.addGraphEdge("E", "F", "関連性");
 
-    // ノードが選択されたときの処理
+    // 情報パネルの要素を取得
+    const infoContent = document.getElementById("infoContent");
+
+    // サーチバーの要素を取得
+    const searchInput = document.getElementById("searchInput");
+    const searchButton = document.getElementById("searchButton");
+    const clearSearchButton = document.getElementById("clearSearchButton");
+
+    // ノード選択時のイベントリスナーを追加
     graph.onNodeSelect((node) => {
-      const infoContent = document.getElementById("infoContent");
-      let infoHtml = `<strong>ノード:</strong> ${node.label}<br><br>`;
-      const relatedEdges = graph.edgesList.filter(edge => edge.source.id === node.id || edge.target.id === node.id);
-      infoHtml += `<strong>関連する関係性:</strong><ul>`;
-      relatedEdges.forEach(edge => {
-        infoHtml += `<li>${edge.label} → ${edge.target.label}</li>`;
-      });
-      infoHtml += `</ul>`;
-      infoContent.innerHTML = infoHtml;
+      if (node.label) {
+        // 関連するエッジを収集
+        const relatedEdges = graph.edgesList.filter(
+          (edge) => edge.source.id === node.id || edge.target.id === node.id
+        );
+
+        let infoHtml = `<strong>ノード:</strong> ${node.label}<br><br>`;
+        if (relatedEdges.length > 0) {
+          infoHtml += `<strong>関連する関係性:</strong><ul>`;
+          relatedEdges.forEach((edge) => {
+            if (edge.source.id === node.id) {
+              infoHtml += `<li><strong>${node.label}</strong> → ${edge.label} → <strong>${edge.target.label}</strong></li>`;
+            } else {
+              infoHtml += `<li><strong>${node.label}</strong> ← ${edge.label} ← <strong>${edge.source.label}</strong></li>`;
+            }
+          });
+          infoHtml += `</ul>`;
+        } else {
+          infoHtml += `<strong>関連する関係性:</strong> なし`;
+        }
+
+        infoContent.innerHTML = infoHtml;
+      }
     });
 
-    // 検索機能
-    document.getElementById("searchButton").addEventListener("click", () => {
-      const query = document.getElementById("searchInput").value.trim();
-      graph.searchAndHighlight(query);
+    // キャンバスクリック時のイベントリスナーを追加
+    graph.onCanvasClick(() => {
+      infoContent.innerHTML = "ノードやエッジをクリックしてください。";
     });
 
-    // ハイライト解除
-    document.getElementById("clearSearchButton").addEventListener("click", () => {
+    // サーチボタンのイベントリスナー
+    searchButton.addEventListener("click", () => {
+      const query = searchInput.value.trim();
+      if (query) {
+        graph.searchAndHighlight(query);
+      }
+    });
+
+    // ハイライト解除ボタンのイベントリスナー
+    clearSearchButton.addEventListener("click", () => {
       graph.clearSearchHighlights();
-      document.getElementById("infoContent").innerHTML = "ノードやエッジをクリックしてください。";
+      infoContent.innerHTML = "ノードやエッジをクリックしてください。";
+    });
+
+    // Enterキーで検索を実行
+    searchInput.addEventListener("keyup", (event) => {
+      if (event.key === "Enter") {
+        searchButton.click();
+      }
     });
   </script>
 </body>
