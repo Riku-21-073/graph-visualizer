@@ -552,26 +552,67 @@ export class GraphVisualizer {
      * @param {MouseEvent} event - マウスイベント。
      */
     onMouseMove(event) {
+      const mousePos = this.getMousePosition(event);
+      
       if (this.draggingNode && this.selectedNode) {
-        const mousePos = this.getMousePosition(event);
-        const newX = (mousePos.x - this.canvas.width / 2) / this.scale;
-        const newY = (mousePos.y - this.canvas.height / 2) / this.scale;
-        this.selectedNode.x = newX - this.cameraOffsetX / this.scale;
-        this.selectedNode.y = newY - this.cameraOffsetY / this.scale;
+          this.updateNodePosition(mousePos);
       } else if (this.rotating) {
-        const dx = event.clientX - this.rotateStart.x;
-        const dy = event.clientY - this.rotateStart.y;
-        this.cameraRotationY += dx * 0.005;
-        this.cameraRotationX += dy * 0.005;
-        this.rotateStart = { x: event.clientX, y: event.clientY };
+          this.updateCameraRotation(event);
       } else if (this.panning) {
-        const dx = event.offsetX - this.panStart.x;
-        const dy = event.offsetY - this.panStart.y;
-        this.cameraOffsetX += dx / this.scale;
-        this.cameraOffsetY += dy / this.scale;
-        this.panStart = { x: event.offsetX, y: event.offsetY };
+          this.updateCameraOffset(event);
       }
-    }
+  }
+  
+  updateNodePosition(mousePos) {
+      const newX = (mousePos.x - this.canvas.width / 2) / this.scale;
+      const newY = (mousePos.y - this.canvas.height / 2) / this.scale;
+  
+      // ノードの新しい位置を計算する際に、視点を考慮
+      const rotatedPosition = this.rotatePoint(newX, newY, this.cameraRotationX, this.cameraRotationY);
+  
+      // Z軸の位置を維持するためのオフセットを適用
+      const depthOffset = this.selectedNode.z;  // ノードの深度を取得
+      this.selectedNode.x = rotatedPosition.x - this.cameraOffsetX / this.scale;
+      this.selectedNode.y = rotatedPosition.y - this.cameraOffsetY / this.scale;
+      this.selectedNode.z = depthOffset; // Z軸は変化しない
+  }
+  
+  updateCameraRotation(event) {
+      const dx = event.clientX - this.rotateStart.x;
+      const dy = event.clientY - this.rotateStart.y;
+      
+      this.cameraRotationY += dx * 0.005;
+      this.cameraRotationX += dy * 0.005;
+      
+      this.rotateStart = { x: event.clientX, y: event.clientY };
+  }
+  
+  updateCameraOffset(event) {
+      const dx = event.offsetX - this.panStart.x;
+      const dy = event.offsetY - this.panStart.y;
+      
+      this.cameraOffsetX += dx / this.scale;
+      this.cameraOffsetY += dy / this.scale;
+      
+      this.panStart = { x: event.offsetX, y: event.offsetY };
+  }
+  
+  // 2Dポイントを回転させる関数
+  rotatePoint(x, y, angleX, angleY) {
+      const cosX = Math.cos(angleX);
+      const sinX = Math.sin(angleX);
+      const cosY = Math.cos(angleY);
+      const sinY = Math.sin(angleY);
+  
+      // Y軸周りの回転
+      const rotatedX = x * cosY + y * sinY * cosX;
+      const rotatedY = -x * sinY + y * cosY * cosX;
+  
+      return { x: rotatedX, y: rotatedY };
+  }
+  
+  
+    
   
     /**
      * マウスアップイベントハンドラー。
